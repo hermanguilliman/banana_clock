@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🍌 Banana Clock 🕗</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body data-theme="dark">
+  <div class="container">
+    <h2>🍌 Banana Clock 🕗</h2>
+    <div class="time"><span id="clock">--:--:--</span></div>
+
+    <button class="big-btn" onclick="syncWithClient()">
+      Синхронизировать с клиентом
+    </button>
+
+    <hr>
+
+    <div class="label">Установить время вручную</div>
+    <form id="setForm" class="inline-form">
+      <input name="h" type="number" min="0" max="23" placeholder="Часы" required>
+      <input name="m" type="number" min="0" max="59" placeholder="Минуты" required>
+      <input type="submit" value="Установить">
+    </form>
+
+    <hr>
+
+    <div class="label">Яркость дисплея</div>
+    <div class="slider-container">
+      <input type="range" id="brightness" min="0" max="7">
+    </div>
+    <div>Текущее значение: <b id="bval">7</b></div>
+
+    <div class="theme-toggle">
+      <label>
+        <input type="checkbox" id="themeSwitch" onchange="toggleTheme()">
+        Тёмная тема
+      </label>
+    </div>
+
+    <footer>Banana Clock &copy Herman Guilliman</footer>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+
+</html>
