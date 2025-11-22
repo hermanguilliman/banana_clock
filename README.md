@@ -1,5 +1,6 @@
 # Автономные часы с веб-интерфейсом на Wemos D1 Mini v4, TM1637 и DS3231
-
+<p align="center" width="100%"><a href="screenshots/0.jpg"><img width="70%" src="screenshots/thumbs/thumb0.jpg"></a>
+</p>
 <p align="center" width="100%">
 <a href="screenshots/1.jpg"><img width="35%" src="screenshots/thumbs/thumb1.jpg"></a>
 <a href="screenshots/2.jpg"><img width="33%" src="screenshots/thumbs/thumb2.jpg"></a>
