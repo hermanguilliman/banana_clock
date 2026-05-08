@@ -34,6 +34,85 @@
     </div>
     <div>Текущее значение: <b id="bval">7</b></div>
 
+    <hr>
+
+    <div class="label">Мелодии и анимации</div>
+
+    <div class="settings-grid">
+      <div class="setting-item">
+        <label>При старте (звук)</label>
+        <select id="sm">
+          <option value="0">Нет</option>
+          <optgroup label="Мелодии">
+            <option value="1">Тетрис</option>
+            <option value="2">Звёздные войны</option>
+            <option value="3">Инспектор Гаджет</option>
+          </optgroup>
+          <optgroup label="Ретро эффекты">
+            <option value="4">Монетка</option>
+            <option value="5">Смерть Пакмана</option>
+            <option value="6">Бонус (Power Up)</option>
+            <option value="7">Лазер</option>
+            <option value="8">Доп. жизнь (1-Up)</option>
+            <option value="9">Прыжок</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <label>При старте (анимация)</label>
+        <select id="sa">
+          <option value="0">Нет</option>
+          <option value="1">Заполнение</option>
+          <option value="2">Спиннер</option>
+          <option value="3">Отсчёт</option>
+          <option value="4">Пульс</option>
+          <option value="5">Змейка</option>
+          <option value="6">Рандом</option>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <label>Ежечасно (звук)</label>
+        <select id="hm">
+          <option value="0">Нет</option>
+          <optgroup label="Мелодии">
+            <option value="1">Тетрис</option>
+            <option value="2">Звёздные войны</option>
+            <option value="3">Инспектор Гаджет</option>
+          </optgroup>
+          <optgroup label="Ретро эффекты">
+            <option value="4">Монетка</option>
+            <option value="5">Смерть Пакмана</option>
+            <option value="6">Бонус (Power Up)</option>
+            <option value="7">Лазер</option>
+            <option value="8">Доп. жизнь (1-Up)</option>
+            <option value="9">Прыжок</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <label>Ежечасно (анимация)</label>
+        <select id="ha">
+          <option value="0">Нет</option>
+          <option value="1">Заполнение</option>
+          <option value="2">Спиннер</option>
+          <option value="3">Отсчёт</option>
+          <option value="4">Пульс</option>
+          <option value="5">Змейка</option>
+          <option value="6">Рандом</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="test-btns">
+      <button class="test-btn" onclick="playTest('startup')">▶ Старт</button>
+      <button class="test-btn" onclick="playTest('hourly')">▶ Ежечасно</button>
+    </div>
+
+    <button class="big-btn save-btn" onclick="saveSettings()">Сохранить настройки</button>
+
     <div class="theme-toggle">
       <label>
         <input type="checkbox" id="themeSwitch" onchange="toggleTheme()">
@@ -41,7 +120,7 @@
       </label>
     </div>
 
-    <footer>Banana Clock &copy Herman Guilliman</footer>
+    <footer>Banana Clock &copy; Herman Guilliman</footer>
   </div>
 
   <script src="/script.js"></script>

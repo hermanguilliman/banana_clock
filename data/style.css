@@ -46,6 +46,7 @@
   border: none;
   border-radius: 14px;
   cursor: pointer;
+  display: block;
 }
 
 .big-btn:hover {
@@ -146,7 +147,8 @@ h2 {
 input[type="number"],
 input[type="range"],
 button,
-input[type="submit"] {
+input[type="submit"],
+select {
   width: 90%;
   max-width: 300px;
   margin: 0.7em auto;
@@ -158,9 +160,16 @@ input[type="submit"] {
   color: var(--text);
 }
 
-input[type="range"] {
-  width: 100%;
-  accent-color: var(--accent);
+select {
+  text-align: center;
+  text-align-last: center;
+}
+
+[data-theme="light"] select,
+[data-theme="light"] input[type="number"] {
+  background: #fff;
+  border-color: #ccc;
+  color: #333;
 }
 
 button,
@@ -186,6 +195,70 @@ hr {
 .label {
   margin: 1em 0 0.5em;
   color: var(--text-secondary);
+  font-weight: bold;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 1em 0;
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+}
+
+.setting-item label {
+  font-size: 0.85em;
+  margin-bottom: 5px;
+  color: var(--text-secondary);
+  min-height: 2.5em; /* Фиксированная высота выравнивает списки */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setting-item select {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.6em;
+  font-size: 0.95em;
+  box-sizing: border-box;
+}
+
+.test-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 1em;
+}
+
+.test-btn {
+  flex: 1;
+  max-width: 150px;
+  padding: 0.6em 1em;
+  font-size: 0.95em;
+  margin: 0;
+  background: var(--accent);
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.test-btn:hover {
+  background: var(--accent-dark);
+}
+
+.save-btn {
+  font-size: 1em !important;
+  padding: 0.8em !important;
 }
 
 .theme-toggle {
