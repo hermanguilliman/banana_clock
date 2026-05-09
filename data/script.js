@@ -1,100 +1,128 @@
-// Загрузка текущей яркости
-fetch("/brightness")
-  .then((r) => r.text())
-  .then((val) => {
-    document.getElementById("brightness").value = val;
-    document.getElementById("bval").textContent = val;
-  });
-
-// Загрузка настроек мелодий и анимаций
-fetch("/getSettings")
-  .then((r) => r.json())
-  .then((data) => {
-    if (data.sm !== undefined) document.getElementById("sm").value = data.sm;
-    if (data.sa !== undefined) document.getElementById("sa").value = data.sa;
-    if (data.hm !== undefined) document.getElementById("hm").value = data.hm;
-    if (data.ha !== undefined) document.getElementById("ha").value = data.ha;
-  });
-
-// Обновление часов
-setInterval(() => {
-  fetch("/time")
-    .then((r) => r.text())
-    .then((t) => {
-      document.getElementById("clock").textContent = t;
-    });
-}, 1000);
-
-// Синхронизация с клиентом
-function syncWithClient() {
-  const d = new Date();
-  fetch(
-    `/syncClient?h=${d.getHours()}&m=${d.getMinutes()}&s=${d.getSeconds()}`
-  ).then(() => fetch("/beep?type=confirm"));
-}
-
-// Ручная установка
-document.getElementById("setForm").onsubmit = function (e) {
-  e.preventDefault();
-  const params = new URLSearchParams(new FormData(this));
-  fetch("/set?" + params.toString()).then(() => fetch("/beep?type=confirm"));
-};
-
-// Яркость
+// --- UI Elements ---
+const clockEl = document.getElementById("clock");
 const slider = document.getElementById("brightness");
 const bval = document.getElementById("bval");
+const toastEl = document.getElementById("toast");
 
-slider.oninput = function () {
-  const val = this.value;
-  bval.textContent = val;
-  this.style.setProperty("--val", (val / 7) * 100 + "%");
-  fetch(`/brightness?value=${val}`);
+// --- Toast System ---
+function showToast(message, type = "success") {
+    toastEl.textContent = message;
+    toastEl.className = `toast ${type} show`;
+    setTimeout(() => {
+        toastEl.className = "toast";
+    }, 3000);
+}
+
+// --- API Helpers ---
+async function apiGet(url) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network error");
+        return await res.text();
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+}
+
+// --- Clock Update ---
+setInterval(async () => {
+    const t = await apiGet("/time");
+    if (t) clockEl.textContent = t;
+}, 1000);
+
+// --- Sync Time ---
+async function syncWithClient() {
+    const d = new Date();
+    await apiGet(
+        `/syncClient?h=${d.getHours()}&m=${d.getMinutes()}&s=${d.getSeconds()}`,
+    );
+    showToast("Время синхронизировано");
+}
+
+// --- Manual Time Set ---
+document.getElementById("setForm").onsubmit = async function (e) {
+    e.preventDefault();
+    const params = new URLSearchParams(new FormData(this));
+    await apiGet("/set?" + params.toString());
+    showToast("Время установлено");
 };
 
-fetch("/brightness")
-  .then((r) => r.text())
-  .then((val) => {
-    slider.value = val;
+// --- Brightness (Live update + Debounced EEPROM save) ---
+slider.oninput = function () {
+    const val = this.value;
     bval.textContent = val;
-    slider.style.setProperty("--val", (val / 7) * 100 + "%");
-  });
+    this.style.setProperty("--val", (val / 7) * 100 + "%");
+    fetch(`/brightness?value=${val}`); // Мгновенное изменение на дисплее
+};
 
-// Сохранение настроек мелодий и анимаций
-function saveSettings() {
-  const sm = document.getElementById("sm").value;
-  const sa = document.getElementById("sa").value;
-  const hm = document.getElementById("hm").value;
-  const ha = document.getElementById("ha").value;
-  
-  fetch(`/saveSettings?sm=${sm}&sa=${sa}&hm=${hm}&ha=${ha}`)
-    .then(() => fetch("/beep?type=confirm"))
-    .then(() => alert("Настройки сохранены!"));
+// --- Load Initial Data ---
+async function init() {
+    const brightVal = await apiGet("/brightness");
+    if (brightVal !== null) {
+        const v = parseInt(brightVal);
+        slider.value = v;
+        bval.textContent = v;
+        slider.style.setProperty("--val", (v / 7) * 100 + "%");
+    } else {
+        slider.style.setProperty("--val", (slider.value / 7) * 100 + "%");
+    }
+
+    try {
+        const res = await fetch("/getSettings");
+        if (res.ok) {
+            const settings = await res.json();
+            if (settings) {
+                if (settings.sm !== undefined)
+                    document.getElementById("sm").value = settings.sm;
+                if (settings.sa !== undefined)
+                    document.getElementById("sa").value = settings.sa;
+                if (settings.hm !== undefined)
+                    document.getElementById("hm").value = settings.hm;
+                if (settings.ha !== undefined)
+                    document.getElementById("ha").value = settings.ha;
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+init();
+
+// --- Settings ---
+async function saveSettings() {
+    const sm = document.getElementById("sm").value;
+    const sa = document.getElementById("sa").value;
+    const hm = document.getElementById("hm").value;
+    const ha = document.getElementById("ha").value;
+    await apiGet(`/saveSettings?sm=${sm}&sa=${sa}&hm=${hm}&ha=${ha}`);
+    showToast("Настройки сохранены в память");
 }
 
-// Тестовое проигрывание
 function playTest(type) {
-  let m, a;
-  if (type === 'startup') {
-    m = document.getElementById("sm").value;
-    a = document.getElementById("sa").value;
-  } else {
-    m = document.getElementById("hm").value;
-    a = document.getElementById("ha").value;
-  }
-  fetch(`/playTest?m=${m}&a=${a}`);
+    let m, a;
+    if (type === "startup") {
+        m = document.getElementById("sm").value;
+        a = document.getElementById("sa").value;
+    } else {
+        m = document.getElementById("hm").value;
+        a = document.getElementById("ha").value;
+    }
+    fetch(`/playTest?m=${m}&a=${a}`);
+    showToast("Воспроизведение...", "success");
 }
 
-// Переключение темы
+// --- Theme ---
 function toggleTheme() {
-  const isDark = document.body.getAttribute("data-theme") === "dark";
-  document.body.setAttribute("data-theme", isDark ? "light" : "dark");
-  document.getElementById("themeSwitch").checked = !isDark;
-  localStorage.setItem("bananaTheme", isDark ? "light" : "dark");
+    const isDark = document.body.getAttribute("data-theme") === "dark";
+    document.body.setAttribute("data-theme", isDark ? "light" : "dark");
+    document.getElementById("themeSwitch").checked = !isDark;
+    localStorage.setItem("bananaTheme", isDark ? "light" : "dark");
 }
 
 if (localStorage.getItem("bananaTheme") === "light") {
-  document.body.setAttribute("data-theme", "light");
-  document.getElementById("themeSwitch").checked = false;
+    document.body.setAttribute("data-theme", "light");
+    document.getElementById("themeSwitch").checked = false;
 } else {
-  document.getElementById("themeSwitch").checked = true;
+    document.getElementById("themeSwitch").checked = true;
 }
