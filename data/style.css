@@ -46,7 +46,6 @@ body {
     letter-spacing: 2px;
 }
 
-/* Кнопки и инпуты */
 .big-btn,
 .inline-form input[type="submit"],
 .test-btn {
@@ -91,7 +90,6 @@ body {
     text-align: center;
 }
 
-/* Слайдер яркости */
 .slider-container {
     margin: 1.5em 0;
 }
@@ -116,7 +114,6 @@ body {
     cursor: pointer;
 }
 
-/* === SELECT (СТРЕЛОЧКА ДЛЯ CHROME) === */
 select {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -154,7 +151,6 @@ select {
     min-height: 30px;
 }
 
-/* === TOGGLE SWITCH (ГАЛОЧКА ДЛЯ CHROME) === */
 .theme-toggle {
     display: flex;
     align-items: center;

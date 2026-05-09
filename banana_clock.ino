@@ -19,31 +19,31 @@ ESP8266WebServer server(80);
 const char *apSSID = "BananaClock";
 const char *apPASS = "banana1234";
 
-// ====================== STATES & VARS ======================
+
 bool dots = true;
 bool rtcOk = false;
 unsigned long lastUpdate = 0;
 uint8_t brightness = 7;
 
-// EEPROM Debounce
+
 bool eepromDirty = false;
 unsigned long eepromDirtyTime = 0;
-const unsigned long EEPROM_WRITE_DELAY = 3000; // 3 сек
+const unsigned long EEPROM_WRITE_DELAY = 3000; 
 
-// Settings
+
 uint8_t startupMelody = 1;
 uint8_t startupAnim = 1;
 uint8_t hourlyMelody = 1;
 uint8_t hourlyAnim = 1;
 
-// ====================== STRUCTURES ======================
+
 struct Note { int freq; int dur; };
 struct AnimFrame { int val; uint8_t dots; int dur; };
 
 struct Melody { const Note* notes; int len; };
 struct Animation { const AnimFrame* frames; int len; };
 
-// ====================== DATA ======================
+
 const Note tetris[] = { {659, 500}, {494, 250}, {523, 250}, {587, 500}, {523, 250}, {494, 250}, {440, 500}, {440, 250}, {523, 250}, {659, 500}, {587, 250}, {523, 250}, {494, 500}, {494, 250}, {523, 250}, {587, 500}, {659, 500}, {523, 500}, {440, 500} };
 const Note starWars[] = { {466, 140}, {466, 140}, {466, 140}, {698, 560}, {1047, 560}, {932, 140}, {880, 140}, {784, 140}, {1397, 560}, {1047, 280}, {932, 140}, {880, 140}, {784, 140}, {1397, 560}, {1047, 280}, {932, 140}, {880, 140}, {932, 140}, {784, 560} };
 const Note gadget[] = { {220, 125}, {247, 62}, {262, 125}, {294, 62}, {330, 125}, {0, 62}, {262, 166}, {311, 166}, {247, 166}, {294, 166}, {262, 166}, {220, 125}, {247, 62}, {262, 125}, {294, 62}, {330, 125}, {0, 62}, {440, 166}, {415, 500}, {220, 125}, {247, 62}, {262, 125}, {294, 62}, {330, 125}, {0, 62}, {262, 166}, {311, 166}, {247, 166}, {294, 166}, {262, 166}, {440, 125}, {415, 62}, {392, 125}, {370, 62}, {349, 125} };
@@ -72,7 +72,7 @@ const Animation animations[] = {
   {animPulse, sizeof(animPulse)/sizeof(AnimFrame)}, {animSnake, sizeof(animSnake)/sizeof(AnimFrame)}, {animRandom, sizeof(animRandom)/sizeof(AnimFrame)}
 };
 
-// ====================== PLAYBACK ENGINE ======================
+
 bool isPlaying = false;
 int melodyIdx = 0, animIdx = 0;
 unsigned long melodyTimer = 0, animTimer = 0;
@@ -135,7 +135,7 @@ void updatePlayback() {
   if (mEnd && aEnd) { isPlaying = false; noTone(BUZZER); }
 }
 
-// ====================== FILE SYSTEM ======================
+
 void handleFileRead(String path) {
   if (path.endsWith("/")) path += "index.html";
   String contentType = "text/plain";
@@ -153,7 +153,7 @@ void handleFileRead(String path) {
   server.send(404, "text/plain", "Not found");
 }
 
-// ====================== API ======================
+
 void handleTime() {
   if (!rtcOk) { server.send(200, "text/plain", "Err: No RTC"); return; }
   DateTime now = rtc.now();
@@ -183,10 +183,10 @@ void handleBrightness() {
   if (server.hasArg("value")) {
     brightness = constrain(server.arg("value").toInt(), 0, 7);
     display.setBrightness(brightness);
-    eepromDirty = true; eepromDirtyTime = millis(); // Отложенная запись
+    eepromDirty = true; eepromDirtyTime = millis(); 
     server.send(200, "text/plain", "OK");
   } else {
-    // ИСПРАВЛЕНО: Возвращаем текущее значение яркости при GET-запросе без параметров
+    
     server.send(200, "text/plain", String(brightness));
   }
 }
@@ -212,7 +212,7 @@ void handlePlayTest() {
   server.send(200, "text/plain", "OK");
 }
 
-// ====================== SETUP ======================
+
 void setup() {
   pinMode(BUZZER, OUTPUT);
   Serial.begin(115200);
@@ -256,7 +256,7 @@ void setup() {
   if (rtcOk) startPlay(startupMelody, startupAnim);
 }
 
-// ====================== LOOP ======================
+
 bool hourlyPlayed = false;
 
 void loop() {

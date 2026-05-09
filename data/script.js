@@ -1,10 +1,8 @@
-// --- UI Elements ---
 const clockEl = document.getElementById("clock");
 const slider = document.getElementById("brightness");
 const bval = document.getElementById("bval");
 const toastEl = document.getElementById("toast");
 
-// --- Toast System ---
 function showToast(message, type = "success") {
     toastEl.textContent = message;
     toastEl.className = `toast ${type} show`;
@@ -13,7 +11,6 @@ function showToast(message, type = "success") {
     }, 3000);
 }
 
-// --- API Helpers ---
 async function apiGet(url) {
     try {
         const res = await fetch(url);
@@ -25,13 +22,11 @@ async function apiGet(url) {
     }
 }
 
-// --- Clock Update ---
 setInterval(async () => {
     const t = await apiGet("/time");
     if (t) clockEl.textContent = t;
 }, 1000);
 
-// --- Sync Time ---
 async function syncWithClient() {
     const d = new Date();
     await apiGet(
@@ -40,7 +35,6 @@ async function syncWithClient() {
     showToast("Время синхронизировано");
 }
 
-// --- Manual Time Set ---
 document.getElementById("setForm").onsubmit = async function (e) {
     e.preventDefault();
     const params = new URLSearchParams(new FormData(this));
@@ -48,15 +42,13 @@ document.getElementById("setForm").onsubmit = async function (e) {
     showToast("Время установлено");
 };
 
-// --- Brightness (Live update + Debounced EEPROM save) ---
 slider.oninput = function () {
     const val = this.value;
     bval.textContent = val;
     this.style.setProperty("--val", (val / 7) * 100 + "%");
-    fetch(`/brightness?value=${val}`); // Мгновенное изменение на дисплее
+    fetch(`/brightness?value=${val}`);
 };
 
-// --- Load Initial Data ---
 async function init() {
     const brightVal = await apiGet("/brightness");
     if (brightVal !== null) {
@@ -89,7 +81,6 @@ async function init() {
 }
 init();
 
-// --- Settings ---
 async function saveSettings() {
     const sm = document.getElementById("sm").value;
     const sa = document.getElementById("sa").value;
@@ -112,7 +103,6 @@ function playTest(type) {
     showToast("Воспроизведение...", "success");
 }
 
-// --- Theme ---
 function toggleTheme() {
     const isDark = document.body.getAttribute("data-theme") === "dark";
     document.body.setAttribute("data-theme", isDark ? "light" : "dark");
