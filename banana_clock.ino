@@ -285,44 +285,47 @@ void handlePlayTest()
   server.send(200, "text/plain", "OK");
 }
 
-void setup()
-{
+void setup() {
+  // 1. Небольшая задержка перед всем остальным для стабилизации питания
+  delay(500); 
+
   pinMode(BUZZER, OUTPUT);
+  digitalWrite(BUZZER, LOW); // Убедимся, что пищалка молчит
+  
   Serial.begin(115200);
   Wire.begin();
   EEPROM.begin(16);
-
-  brightness = EEPROM.read(0);
-  if (brightness > 7)
-    brightness = 7;
-
-  if (!LittleFS.begin())
-    Serial.println("LittleFS failed!");
-
+  
+  brightness = EEPROM.read(0); 
+  if (brightness > 7) brightness = 7;
   display.setBrightness(brightness);
 
-  if (rtc.begin())
-  {
+  // Сначала проверяем RTC
+  if (rtc.begin()) {
     rtcOk = true;
-  }
-  else
-  {
-    display.showNumberDecEx(8888, 0b01000000, true);
+  } else {
+    Serial.println("RTC failed");
   }
 
-  WiFi.softAP(apSSID, apPASS);
-  MDNS.begin("banana");
-
-  server.on("/time", HTTP_GET, handleTime);
-  server.on("/set", HTTP_GET, handleSetTime);
-  server.on("/brightness", HTTP_GET, handleBrightness);
-  server.on("/syncClient", HTTP_GET, handleSyncClient);
-  server.on("/playTest", HTTP_GET, handlePlayTest);
-  server.onNotFound([]()
-                    { handleFileRead(server.uri()); });
-  server.begin();
-
+  // 2. Сначала запускаем слот-машину (звуки и анимация)
+  // В этот момент Wi-Fi еще выключен, нагрузка на БП меньше
   startSlotMachine();
+
+  // 3. Запускаем Wi-Fi ПОСЛЕ того, как первичные процессы пошли
+  WiFi.mode(WIFI_AP); // Явно задаем режим только точки доступа
+  WiFi.softAP(apSSID, apPASS);
+  WiFi.setOutputPower(10); // Ограничим мощность передатчика (0 - 20.5)
+
+  if (LittleFS.begin()) {
+    MDNS.begin("banana");
+    server.on("/time", HTTP_GET, handleTime);
+    server.on("/set", HTTP_GET, handleSetTime);
+    server.on("/brightness", HTTP_GET, handleBrightness);
+    server.on("/syncClient", HTTP_GET, handleSyncClient);
+    server.on("/playTest", HTTP_GET, handlePlayTest);
+    server.onNotFound([]() { handleFileRead(server.uri()); });
+    server.begin();
+  }
 }
 
 void loop()
