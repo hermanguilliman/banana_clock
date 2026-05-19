@@ -90,17 +90,9 @@ async function saveSettings() {
     showToast("Настройки сохранены в память");
 }
 
-function playTest(type) {
-    let m, a;
-    if (type === "startup") {
-        m = document.getElementById("sm").value;
-        a = document.getElementById("sa").value;
-    } else {
-        m = document.getElementById("hm").value;
-        a = document.getElementById("ha").value;
-    }
-    fetch(`/playTest?m=${m}&a=${a}`);
-    showToast("Воспроизведение...", "success");
+function playTest() {
+    fetch(`/playTest`);
+    showToast("Запуск слот-машины...", "success");
 }
 
 function toggleTheme() {
