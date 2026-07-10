@@ -42,11 +42,13 @@ document.getElementById("setForm").onsubmit = async function (e) {
     showToast("Время установлено");
 };
 
+let brightnessTimer = null;
 slider.oninput = function () {
     const val = this.value;
     bval.textContent = val;
     this.style.setProperty("--val", (val / 7) * 100 + "%");
-    fetch(`/brightness?value=${val}`);
+    clearTimeout(brightnessTimer);
+    brightnessTimer = setTimeout(() => fetch(`/brightness?value=${val}`), 200);
 };
 
 async function init() {
@@ -62,18 +64,36 @@ async function init() {
 
     const chimeVal = await apiGet("/hourlyChime");
     if (chimeVal !== null) {
-        const enabled = parseInt(chimeVal) !== 0;
-        document.getElementById("chimeSwitch").checked = enabled;
-        document.getElementById("chimeLabel").textContent = enabled ? "Включено" : "Выключено";
+        document.getElementById("chimeSwitch").checked = parseInt(chimeVal) !== 0;
+    }
+
+    const startupVal = await apiGet("/startupChime");
+    if (startupVal !== null) {
+        document.getElementById("startupSwitch").checked = parseInt(startupVal) !== 0;
     }
 }
 init();
 
 async function toggleChime() {
     const enabled = document.getElementById("chimeSwitch").checked;
-    document.getElementById("chimeLabel").textContent = enabled ? "Включено" : "Выключено";
     await apiGet(`/hourlyChime?value=${enabled ? 1 : 0}`);
-    showToast(enabled ? "Писк включён" : "Писк выключен");
+    showToast(enabled ? "Куранты включены" : "Куранты выключены");
+}
+
+async function toggleStartupChime() {
+    const enabled = document.getElementById("startupSwitch").checked;
+    await apiGet(`/startupChime?value=${enabled ? 1 : 0}`);
+    showToast(enabled ? "Звук включения включён" : "Звук включения выключен");
+}
+
+function playStartup() {
+    fetch("/playStartup");
+    showToast("Воспроизведение звука включения...");
+}
+
+function playHourly() {
+    fetch("/playHourly");
+    showToast("Воспроизведение курантов...");
 }
 
 function toggleTheme() {

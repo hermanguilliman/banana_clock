@@ -38,13 +38,28 @@
     <hr>
 
     <section>
-      <div class="label">Писк каждый час</div>
-      <div class="toggle-row">
-        <span class="toggle-label" id="chimeLabel">Включено</span>
-        <label class="switch">
-          <input type="checkbox" id="chimeSwitch" onchange="toggleChime()">
-          <span class="slider-round"></span>
-        </label>
+      <div class="label">Звуки</div>
+
+      <div class="sound-row">
+        <div class="sound-info">
+          <span class="sound-name">Звук при включении</span>
+          <label class="switch">
+            <input type="checkbox" id="startupSwitch" onchange="toggleStartupChime()">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+        <button class="small-btn" onclick="playStartup()">Тест</button>
+      </div>
+
+      <div class="sound-row">
+        <div class="sound-info">
+          <span class="sound-name">Куранты каждый час</span>
+          <label class="switch">
+            <input type="checkbox" id="chimeSwitch" onchange="toggleChime()">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+        <button class="small-btn" onclick="playHourly()">Тест</button>
       </div>
     </section>
 

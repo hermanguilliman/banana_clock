@@ -107,43 +107,6 @@ body {
     cursor: pointer;
 }
 
-select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 100%;
-    padding: 0.8em 35px 0.8em 1em;
-    background: #2d2d2d;
-    color: #fff;
-    border: 1px solid #444;
-    border-radius: 10px;
-    font-size: 1em;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f7b733'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 20px;
-    cursor: pointer;
-}
-[data-theme="light"] select {
-    background-color: #eee;
-    color: #333;
-    border-color: #ccc;
-}
-
-.settings-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin: 1em 0;
-}
-.setting-item label {
-    font-size: 0.8em;
-    color: var(--text-secondary);
-    display: block;
-    margin-bottom: 5px;
-    min-height: 30px;
-}
-
 .theme-toggle {
     display: flex;
     align-items: center;
@@ -205,22 +168,36 @@ hr {
     color: var(--text-secondary);
     font-size: 0.9em;
 }
-.test-btns {
-    display: flex;
-    gap: 10px;
-}
-.toggle-row {
+.sound-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin: 1em 0;
+    justify-content: space-between;
+    margin: 0.8em 0;
+    gap: 10px;
 }
-.toggle-label {
+.sound-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sound-name {
     font-size: 0.9em;
     color: var(--text-secondary);
-    min-width: 80px;
-    text-align: right;
+}
+.small-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5em 1em;
+    font-size: 0.85em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+.small-btn:hover {
+    background: var(--accent-dark);
 }
 footer {
     margin-top: 2em;
