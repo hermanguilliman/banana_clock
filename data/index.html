@@ -38,12 +38,13 @@
     <hr>
 
     <section>
-      <div class="label">Слот-машина</div>
-      <p style="font-size: 0.8em; color: var(--text-secondary);">
-        Срабатывает при включении и каждый час.
-      </p>
-      <div class="test-btns">
-        <button class="big-btn" onclick="playTest()">▶ Запустить тест слот-машины</button>
+      <div class="label">Писк каждый час</div>
+      <div class="toggle-row">
+        <span class="toggle-label" id="chimeLabel">Включено</span>
+        <label class="switch">
+          <input type="checkbox" id="chimeSwitch" onchange="toggleChime()">
+          <span class="slider-round"></span>
+        </label>
       </div>
     </section>
 

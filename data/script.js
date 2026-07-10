@@ -60,39 +60,20 @@ async function init() {
         slider.style.setProperty("--val", (slider.value / 7) * 100 + "%");
     }
 
-    try {
-        const res = await fetch("/getSettings");
-        if (res.ok) {
-            const settings = await res.json();
-            if (settings) {
-                if (settings.sm !== undefined)
-                    document.getElementById("sm").value = settings.sm;
-                if (settings.sa !== undefined)
-                    document.getElementById("sa").value = settings.sa;
-                if (settings.hm !== undefined)
-                    document.getElementById("hm").value = settings.hm;
-                if (settings.ha !== undefined)
-                    document.getElementById("ha").value = settings.ha;
-            }
-        }
-    } catch (e) {
-        console.error(e);
+    const chimeVal = await apiGet("/hourlyChime");
+    if (chimeVal !== null) {
+        const enabled = parseInt(chimeVal) !== 0;
+        document.getElementById("chimeSwitch").checked = enabled;
+        document.getElementById("chimeLabel").textContent = enabled ? "Включено" : "Выключено";
     }
 }
 init();
 
-async function saveSettings() {
-    const sm = document.getElementById("sm").value;
-    const sa = document.getElementById("sa").value;
-    const hm = document.getElementById("hm").value;
-    const ha = document.getElementById("ha").value;
-    await apiGet(`/saveSettings?sm=${sm}&sa=${sa}&hm=${hm}&ha=${ha}`);
-    showToast("Настройки сохранены в память");
-}
-
-function playTest() {
-    fetch(`/playTest`);
-    showToast("Запуск слот-машины...", "success");
+async function toggleChime() {
+    const enabled = document.getElementById("chimeSwitch").checked;
+    document.getElementById("chimeLabel").textContent = enabled ? "Включено" : "Выключено";
+    await apiGet(`/hourlyChime?value=${enabled ? 1 : 0}`);
+    showToast(enabled ? "Писк включён" : "Писк выключен");
 }
 
 function toggleTheme() {

@@ -47,8 +47,7 @@ body {
 }
 
 .big-btn,
-.inline-form input[type="submit"],
-.test-btn {
+.inline-form input[type="submit"] {
     background: var(--accent);
     color: #000;
     border: none;
@@ -62,12 +61,6 @@ body {
     padding: 1em;
     font-size: 1.1em;
     margin: 1em 0;
-}
-.test-btn {
-    background: #444;
-    color: #fff;
-    padding: 0.8em;
-    flex: 1;
 }
 .big-btn:hover,
 .inline-form input[type="submit"]:hover {
@@ -215,6 +208,19 @@ hr {
 .test-btns {
     display: flex;
     gap: 10px;
+}
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 1em 0;
+}
+.toggle-label {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    min-width: 80px;
+    text-align: right;
 }
 footer {
     margin-top: 2em;
