@@ -15,10 +15,15 @@
 #define SDA_PIN D2
 #define SCL_PIN D1
 
-#define EEPROM_ADDR_BRIGHTNESS 0
-#define EEPROM_ADDR_CHIME      1
-#define EEPROM_ADDR_STARTUP    2
-#define EEPROM_SIZE            16
+#define EEPROM_SIZE        16
+#define EEPROM_ADDR_DATA   0
+#define EEPROM_ADDR_CHECK  14
+
+#define WDT_TIMEOUT_MS     30000
+
+#define DEFAULT_BRIGHTNESS 4
+#define DEFAULT_CHIME      1
+#define DEFAULT_STARTUP    1
 
 TM1637Display display(CLK, DIO);
 RTC_DS3231 rtc;
@@ -27,17 +32,54 @@ ESP8266WebServer server(80);
 const char *const apSSID = "BananaClock";
 const char *const apPASS = "banana1234";
 
+struct Settings
+{
+  uint8_t brightness;
+  uint8_t hourlyChime;
+  uint8_t startupChime;
+  uint8_t reserved[11];
+  uint8_t checksum;
+};
+
+Settings settings;
 bool dots = true;
 bool rtcOk = false;
 unsigned long lastUpdate = 0;
-uint8_t brightness = 7;
 
-bool hourlyChimeEnabled = true;
-bool startupChimeEnabled = true;
 bool hourlyPlayed = false;
 bool eepromDirty = false;
 unsigned long eepromDirtyTime = 0;
 const unsigned long EEPROM_WRITE_DELAY = 3000;
+
+uint8_t calcChecksum(const Settings *s)
+{
+  uint8_t sum = 0;
+  const uint8_t *p = (const uint8_t *)s;
+  for (int i = 0; i < EEPROM_ADDR_CHECK; i++)
+    sum ^= p[i];
+  return sum;
+}
+
+void loadSettings()
+{
+  EEPROM.get(EEPROM_ADDR_DATA, settings);
+  if (calcChecksum(&settings) != settings.checksum)
+  {
+    settings.brightness = DEFAULT_BRIGHTNESS;
+    settings.hourlyChime = DEFAULT_CHIME;
+    settings.startupChime = DEFAULT_STARTUP;
+    settings.checksum = calcChecksum(&settings);
+  }
+  if (settings.brightness > 7)
+    settings.brightness = DEFAULT_BRIGHTNESS;
+}
+
+void markSettingsDirty()
+{
+  settings.checksum = calcChecksum(&settings);
+  eepromDirty = true;
+  eepromDirtyTime = millis();
+}
 
 void playStartupSound()
 {
@@ -139,15 +181,14 @@ void handleBrightness()
 {
   if (server.hasArg("value"))
   {
-    brightness = constrain(server.arg("value").toInt(), 0, 7);
-    display.setBrightness(brightness);
-    eepromDirty = true;
-    eepromDirtyTime = millis();
+    settings.brightness = constrain(server.arg("value").toInt(), 0, 7);
+    display.setBrightness(settings.brightness);
+    markSettingsDirty();
     server.send(200, "text/plain", "OK");
   }
   else
   {
-    server.send(200, "text/plain", String(brightness));
+    server.send(200, "text/plain", String(settings.brightness));
   }
 }
 
@@ -155,14 +196,13 @@ void handleHourlyChime()
 {
   if (server.hasArg("value"))
   {
-    hourlyChimeEnabled = server.arg("value").toInt() != 0;
-    eepromDirty = true;
-    eepromDirtyTime = millis();
+    settings.hourlyChime = server.arg("value").toInt() != 0;
+    markSettingsDirty();
     server.send(200, "text/plain", "OK");
   }
   else
   {
-    server.send(200, "text/plain", String(hourlyChimeEnabled ? 1 : 0));
+    server.send(200, "text/plain", String(settings.hourlyChime));
   }
 }
 
@@ -170,14 +210,13 @@ void handleStartupChime()
 {
   if (server.hasArg("value"))
   {
-    startupChimeEnabled = server.arg("value").toInt() != 0;
-    eepromDirty = true;
-    eepromDirtyTime = millis();
+    settings.startupChime = server.arg("value").toInt() != 0;
+    markSettingsDirty();
     server.send(200, "text/plain", "OK");
   }
   else
   {
-    server.send(200, "text/plain", String(startupChimeEnabled ? 1 : 0));
+    server.send(200, "text/plain", String(settings.startupChime));
   }
 }
 
@@ -195,25 +234,21 @@ void handlePlayHourly()
 
 void setup()
 {
-  delay(500);
+  ESP.wdtEnable(WDT_TIMEOUT_MS);
 
   pinMode(BUZZER, OUTPUT);
   digitalWrite(BUZZER, LOW);
 
-  Serial.begin(115200);
+  delay(500);
+
   Wire.begin(SDA_PIN, SCL_PIN);
   Wire.setClock(100000);
   EEPROM.begin(EEPROM_SIZE);
 
-  brightness = EEPROM.read(EEPROM_ADDR_BRIGHTNESS);
-  if (brightness > 7)
-    brightness = 7;
+  loadSettings();
 
   delay(200);
-  display.setBrightness(brightness);
-
-  hourlyChimeEnabled = EEPROM.read(EEPROM_ADDR_CHIME) != 0;
-  startupChimeEnabled = EEPROM.read(EEPROM_ADDR_STARTUP) != 0;
+  display.setBrightness(settings.brightness);
 
   for (int attempt = 0; attempt < 3; attempt++)
   {
@@ -222,26 +257,20 @@ void setup()
       rtcOk = true;
       break;
     }
-    Serial.printf("RTC init attempt %d failed, retrying...\n", attempt + 1);
     delay(200);
     Wire.begin(SDA_PIN, SCL_PIN);
     Wire.setClock(100000);
   }
-  if (!rtcOk)
-    Serial.println("RTC failed after 3 attempts");
 
-  if (startupChimeEnabled)
+  if (settings.startupChime)
     playStartupSound();
 
   WiFi.mode(WIFI_AP);
   WiFi.softAP(apSSID, apPASS);
-  WiFi.setOutputPower(10);
+  WiFi.setOutputPower(7);
 
   if (!LittleFS.begin())
-  {
-    Serial.println("LittleFS mount failed");
     return;
-  }
 
   MDNS.begin("banana");
   server.on("/time", HTTP_GET, handleTime);
@@ -253,12 +282,14 @@ void setup()
   server.on("/playStartup", HTTP_GET, handlePlayStartup);
   server.on("/playHourly", HTTP_GET, handlePlayHourly);
   server.onNotFound([]() { handleFileRead(server.uri()); });
-  display.setBrightness(brightness);
+  display.setBrightness(settings.brightness);
   server.begin();
 }
 
 void loop()
 {
+  ESP.wdtFeed();
+
   server.handleClient();
   MDNS.update();
 
@@ -271,7 +302,7 @@ void loop()
       if (!hourlyPlayed)
       {
         hourlyPlayed = true;
-        if (hourlyChimeEnabled)
+        if (settings.hourlyChime)
           playHourlySound();
       }
     }
@@ -291,9 +322,8 @@ void loop()
 
   if (eepromDirty && millis() - eepromDirtyTime >= EEPROM_WRITE_DELAY)
   {
-    EEPROM.write(EEPROM_ADDR_BRIGHTNESS, brightness);
-    EEPROM.write(EEPROM_ADDR_CHIME, hourlyChimeEnabled ? 1 : 0);
-    EEPROM.write(EEPROM_ADDR_STARTUP, startupChimeEnabled ? 1 : 0);
+    settings.checksum = calcChecksum(&settings);
+    EEPROM.put(EEPROM_ADDR_DATA, settings);
     EEPROM.commit();
     eepromDirty = false;
   }
