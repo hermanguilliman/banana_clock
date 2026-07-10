@@ -60,7 +60,7 @@ void handleTime()
     return;
   }
   DateTime now = rtc.now();
-  char buf[9];
+  char buf[12];
   sprintf(buf, "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
   server.send(200, "text/plain", buf);
 }
