@@ -12,6 +12,9 @@
 #define DIO D6
 #define BUZZER D7
 
+#define SDA_PIN D2
+#define SCL_PIN D1
+
 #define EEPROM_ADDR_BRIGHTNESS 0
 #define EEPROM_ADDR_CHIME      1
 #define EEPROM_ADDR_STARTUP    2
@@ -198,7 +201,8 @@ void setup()
   digitalWrite(BUZZER, LOW);
 
   Serial.begin(115200);
-  Wire.begin();
+  Wire.begin(SDA_PIN, SCL_PIN);
+  Wire.setClock(100000);
   EEPROM.begin(EEPROM_SIZE);
 
   brightness = EEPROM.read(EEPROM_ADDR_BRIGHTNESS);
@@ -209,9 +213,22 @@ void setup()
   hourlyChimeEnabled = EEPROM.read(EEPROM_ADDR_CHIME) != 0;
   startupChimeEnabled = EEPROM.read(EEPROM_ADDR_STARTUP) != 0;
 
-  rtcOk = rtc.begin();
+  for (int attempt = 0; attempt < 3; attempt++)
+  {
+    if (rtc.begin())
+    {
+      rtcOk = true;
+      break;
+    }
+    Serial.printf("RTC init attempt %d failed, retrying...\n", attempt + 1);
+    Wire.end();
+    delay(100);
+    Wire.begin(SDA_PIN, SCL_PIN);
+    Wire.setClock(100000);
+    delay(100);
+  }
   if (!rtcOk)
-    Serial.println("RTC failed");
+    Serial.println("RTC failed after 3 attempts");
 
   if (startupChimeEnabled)
     playStartupSound();
