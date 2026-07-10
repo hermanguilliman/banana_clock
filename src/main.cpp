@@ -41,7 +41,7 @@ const unsigned long EEPROM_WRITE_DELAY = 3000;
 
 void playStartupSound()
 {
-  const uint16_t notes[] = {523, 659, 784, 1047};
+  const uint16_t notes[] = {392, 494, 587, 784};
   const uint16_t durations[] = {100, 100, 100, 200};
   for (int i = 0; i < 4; i++)
   {
@@ -53,7 +53,7 @@ void playStartupSound()
 
 void playHourlySound()
 {
-  const uint16_t notes[] = {1047, 784, 659, 523};
+  const uint16_t notes[] = {784, 587, 494, 392};
   const uint16_t durations[] = {150, 150, 150, 250};
   for (int i = 0; i < 4; i++)
   {
@@ -208,6 +208,8 @@ void setup()
   brightness = EEPROM.read(EEPROM_ADDR_BRIGHTNESS);
   if (brightness > 7)
     brightness = 7;
+
+  delay(200);
   display.setBrightness(brightness);
 
   hourlyChimeEnabled = EEPROM.read(EEPROM_ADDR_CHIME) != 0;
@@ -221,11 +223,9 @@ void setup()
       break;
     }
     Serial.printf("RTC init attempt %d failed, retrying...\n", attempt + 1);
-    Wire.end();
-    delay(100);
+    delay(200);
     Wire.begin(SDA_PIN, SCL_PIN);
     Wire.setClock(100000);
-    delay(100);
   }
   if (!rtcOk)
     Serial.println("RTC failed after 3 attempts");
@@ -253,6 +253,7 @@ void setup()
   server.on("/playStartup", HTTP_GET, handlePlayStartup);
   server.on("/playHourly", HTTP_GET, handlePlayHourly);
   server.onNotFound([]() { handleFileRead(server.uri()); });
+  display.setBrightness(brightness);
   server.begin();
 }
 
