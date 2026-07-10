@@ -41,21 +41,21 @@ const unsigned long EEPROM_WRITE_DELAY = 3000;
 
 void playStartupSound()
 {
-  const uint16_t notes[] = {392, 494, 587, 784};
-  const uint16_t durations[] = {100, 100, 100, 200};
-  for (int i = 0; i < 4; i++)
+  const uint16_t notes[] = {392, 440, 523};
+  const uint16_t durations[] = {180, 180, 280};
+  for (int i = 0; i < 3; i++)
   {
     tone(BUZZER, notes[i], durations[i]);
-    delay(durations[i] + 20);
+    delay(durations[i] + 30);
   }
   noTone(BUZZER);
 }
 
 void playHourlySound()
 {
-  const uint16_t notes[] = {784, 587, 494, 392};
-  const uint16_t durations[] = {150, 150, 150, 250};
-  for (int i = 0; i < 4; i++)
+  const uint16_t notes[] = {523, 440, 392};
+  const uint16_t durations[] = {180, 180, 280};
+  for (int i = 0; i < 3; i++)
   {
     tone(BUZZER, notes[i], durations[i]);
     delay(durations[i] + 30);
